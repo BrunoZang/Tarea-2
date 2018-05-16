@@ -90,13 +90,14 @@ filter(dat_emision,emision==max(emision,na.rm=TRUE))
 La mayor emision de la Quema de Biomasa fue en el 2016
 
 #3
+
 ```{r}
 value.mean <-dat_emision %>%
   group_by(fuente)%>%
-  filter(fuente !="TOTAL") %>%
-  summarise(media=mean(emision ,na.rm = TRUE)) %>% 
+  filter(!fuente %in%c("TOTAL", "S_C", "I_E"))%>%
+  summarise(media=mean(emision)) %>% 
   arrange(desc(media)) %>% 
-  top_n(5)
+  head(5)
 value.mean
 ```
 
@@ -105,10 +106,9 @@ value.mean
 library(ggplot2)
 dat_emision %>% filter(!is.na(emision)) %>%
   filter(fuente==c("I","T","CE_SP","Q_B","BI")) %>%
-  ggplot(aes(x=AÑO, y=emision))+
-  geom_line()+
+  ggplot(aes(x=AÑO, y=emision, group=fuente, colour=fuente))+
   geom_point() +
-  facet_wrap(~fuente) +
+  geom_line()
   labs(x="Años", y= "Emisión de CO2", title= "Serie Temporal de las Fuentes de Emisión de CO2", caption="Lo que me llama mas la atencion es la mayor emision de CO2 de la fuente Quema de Biomasa 
        a partir de 2005 mientras que las demas fuentes se mantienen (a exepcion de CE_SP que disminuye abruptamente)")
 ```
@@ -156,5 +156,70 @@ Recuerde que en las visualizaciones, las etiquetas de los ejes deben ser claras 
 ```{r, echo=FALSE}
 
 gastos <- read.csv("gastosmed.csv", header = TRUE, dec = ",") 
+colnames(gastos)[3] <- "Edad"
+```
+
+## Preguntas a Responder
+```{r}
+dim(gastos)
+```
+
+
+
+```{r}
 
 ```
+
+ 1.Número de pacientes por su edad separados por sexo
+```{r}
+ggplot(gastos,aes(x=(Sexo)))+geom_bar(aes(fill=Sexo))+labs(x="Sexo",y="cantidad de pacientes")
+```
+ 
+```{r}
+
+gastos %>%
+  ggplot(aes(Edad, fill = Sexo))+geom_histogram()+facet_wrap( ~ Sexo)+labs(x =  "Edad", y = "Número de pacientes", caption="Se puede ver que hay mas pacientes del Sexo Masculino en la mayoria de las edades y se puede ver un incremento de pacientes en ambos sexo empezando de los 50 en adelante")
+```
+
+
+
+ 2.¿Que prestacion se realiza mas?
+```{r}
+
+gastos %>%
+  ggplot(aes(x = fct_infreq(Prestacion))) +geom_bar()+coord_flip() +labs(y = "Número de pacientes", x = "Prestaciones", caption="Se puede visualizar que la prestacion que mas se realiza es PCI")
+```
+
+```{r}
+ggplot(gastos, aes(x=Prestacion,fill=Sexo))+
+geom_bar()+coord_flip()+facet_wrap(~Sexo)+
+labs(x="Tipo de prestaciones",y="Número de pacientes",caption="Para los dos sexos la prestacion que mas se realiza es PCI")
+```
+
+
+
+ 3. ¿Donde ocurre la mayoria de los casos y en donde esta la mayoria de los pacientes?
+```{r}
+gastos %>% ggplot(aes(x = fct_infreq(Prestador_departamento))) +geom_bar() +coord_flip() +
+  labs(x = "Departamento", y = "Número de pacientes",caption="Donde ocurren mas casos es en Montevideo predecible porque mas de la mitad de la poblacion uruguaya vive en la capital")
+```
+
+
+
+```{r}
+ggplot(gastos,aes(x=(Prestador_tipo)))+
+geom_bar()+labs(y="Número de pacientes",x="Tipo de Prestador",caption="Hay un mayor número de pacientes en IAMC")
+```
+
+ 4. ¿Quien gasta mas segun la edad y el sexo del paciente?
+```{r}
+group_by(gastos,Edad,Sexo) %>%summarise(Media=sum(Importe))%>% ggplot(aes(Edad,Media,colour=Sexo))+geom_line()+labs(x="Edad", y="Importe Total",caption="Se puede ver que a temprana edad Mujeres pagan un poco mas que los hombres hasta una edad de 45 años donde el Hombre supera los gastos de la mujer, pero luego a una avanzada edad de 85 años nuevamente las mujeres pagan un poco mas que los hombres")
+```
+
+ 5. Se me ocurrira despues.
+
+
+
+
+
+
