@@ -160,15 +160,7 @@ colnames(gastos)[3] <- "Edad"
 ```
 
 ## Preguntas a Responder
-```{r}
-dim(gastos)
-```
 
-
-
-```{r}
-
-```
 
  1.Número de pacientes por su edad separados por sexo
 ```{r}
@@ -178,7 +170,7 @@ ggplot(gastos,aes(x=(Sexo)))+geom_bar(aes(fill=Sexo))+labs(x="Sexo",y="cantidad 
 ```{r}
 
 gastos %>%
-  ggplot(aes(Edad, fill = Sexo))+geom_histogram()+facet_wrap( ~ Sexo)+labs(x =  "Edad", y = "Número de pacientes", caption="Se puede ver que hay mas pacientes del Sexo Masculino en la mayoria de las edades y se puede ver un incremento de pacientes en ambos sexo empezando de los 50 en adelante")
+  ggplot(aes(Edad, fill = Sexo))+geom_histogram()+facet_wrap( ~ Sexo)+labs(x =  "Edad", y = "Número de pacientes", caption="Se puede ver que hay mas pacientes del Sexo Masculino en la mayoria de las edades y se puede ver un incremento significativo de pacientes en ambos sexo a los 50 años")
 ```
 
 
@@ -187,21 +179,26 @@ gastos %>%
 ```{r}
 
 gastos %>%
-  ggplot(aes(x = fct_infreq(Prestacion))) +geom_bar()+coord_flip() +labs(y = "Número de pacientes", x = "Prestaciones", caption="Se puede visualizar que la prestacion que mas se realiza es PCI")
+  ggplot(aes(x = fct_infreq(Prestacion))) +geom_bar()+coord_flip() +labs(y = "Número de pacientes", x = "Prestaciones", caption="Se puede visualizar que la prestacion que mas se realiza es PCI, seguido de la Dialisis")
 ```
 
 ```{r}
 ggplot(gastos, aes(x=Prestacion,fill=Sexo))+
 geom_bar()+coord_flip()+facet_wrap(~Sexo)+
-labs(x="Tipo de prestaciones",y="Número de pacientes",caption="Para los dos sexos la prestacion que mas se realiza es PCI")
+labs(x="Tipo de prestaciones",y="Número de pacientes",caption="Para los dos sexos la prestacion que mas se realiza es PCI, pero a diferencia que el Sexo Masculino que la segunda prestacion mas realizada es PCI-ATCP mientras que el de la del Sexo Femenino es la Dialisis")
+```
+ 
+ 3.a¿De donde son la mayoria de los pacientes atendidos?
+ 
+```{r}
+gastos %>% ggplot(aes(x = fct_infreq(Departamento_residencia))) +geom_bar(aes(fill=Departamento_residencia)) +coord_flip() +
+  labs(x = "Departamento", y = "Número de pacientes",caption="Los pacientes son mayormente de Montevideo algo obvio ya que la mayor parte de la poblacion esta en la capital")
 ```
 
-
-
- 3. ¿Donde ocurre la mayoria de los casos y en donde esta la mayoria de los pacientes?
+ 3.b ¿En que departamento esta la mayoria de los pacientes siendo atendidos y por cual asociasión?
 ```{r}
-gastos %>% ggplot(aes(x = fct_infreq(Prestador_departamento))) +geom_bar() +coord_flip() +
-  labs(x = "Departamento", y = "Número de pacientes",caption="Donde ocurren mas casos es en Montevideo predecible porque mas de la mitad de la poblacion uruguaya vive en la capital")
+gastos %>% ggplot(aes(x = fct_infreq(Prestador_departamento))) +geom_bar(aes(fill=Prestador_departamento)) +coord_flip() +
+  labs(x = "Departamento", y = "Número de pacientes",caption="Donde  se atiende mas a los paciente es en Montevideo ya que estan mas capacitados con tecnologia")
 ```
 
 
@@ -213,10 +210,16 @@ geom_bar()+labs(y="Número de pacientes",x="Tipo de Prestador",caption="Hay un m
 
  4. ¿Quien gasta mas segun la edad y el sexo del paciente?
 ```{r}
-group_by(gastos,Edad,Sexo) %>%summarise(Media=sum(Importe))%>% ggplot(aes(Edad,Media,colour=Sexo))+geom_line()+labs(x="Edad", y="Importe Total",caption="Se puede ver que a temprana edad Mujeres pagan un poco mas que los hombres hasta una edad de 45 años donde el Hombre supera los gastos de la mujer, pero luego a una avanzada edad de 85 años nuevamente las mujeres pagan un poco mas que los hombres")
+group_by(gastos,Edad,Sexo) %>%summarise(Media=sum(Importe))%>% ggplot(aes(Edad,Media,colour=Sexo))+geom_line()+labs(x="Edad", y="Importe Total Medio",caption="Se puede ver que a temprana edad Mujeres pagan un poco mas que los hombres hasta una edad de 45 años donde el Hombre supera los gastos de la mujer, pero luego a una avanzada edad de 85 años nuevamente las mujeres pagan un poco mas que los hombres")
 ```
 
- 5. Se me ocurrira despues.
+ 5. ¿Que departamento pagan mas por los tratamientos médicos?
+```{r}
+group_by(gastos,Importe,Departamento_residencia) %>% summarise(Media=sum(Importe))%>%
+ggplot(aes((Media),Departamento_residencia))+geom_smooth(method = "lm",
+se = FALSE)+labs(x="Importe medio total", y="Departamentos",caption="Se puede ver que los pacientes que pagan mas son los que provienen de Montevideo, Seguidos de Canelones")
+```
+
 
 
 
